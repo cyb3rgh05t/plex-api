@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getConfig, saveConfig } from "../../config/format";
-import { FormatConfig } from "../../lib/types";
-import { logger } from "../../lib/logger";
+import { getConfig, saveConfig } from "@/app/lib/format";
+import { FormatConfig } from "@/app/lib/types";
+import { logger } from "@/app/lib/logger";
 
 export async function GET(request: Request) {
   logger.logRequest(request);
@@ -10,15 +10,11 @@ export async function GET(request: Request) {
     logger.debug("Reading format configuration");
     const config = await getConfig();
     logger.debug("Configuration read successfully", { config });
-
-    logger.logResponse(200, { config });
     return NextResponse.json(config);
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    logger.error("Failed to read config", { error: errorMessage });
-
-    logger.logResponse(500, { error: errorMessage });
+    logger.error("Failed to read config", {
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       { error: "Failed to read config" },
       { status: 500 }
@@ -35,15 +31,11 @@ export async function POST(request: Request) {
 
     await saveConfig(config);
     logger.info("Configuration saved successfully", { config });
-
-    logger.logResponse(200, { success: true });
     return NextResponse.json({ success: true });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    logger.error("Failed to save config", { error: errorMessage });
-
-    logger.logResponse(500, { error: errorMessage });
+    logger.error("Failed to save config", {
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json(
       { error: "Failed to save config" },
       { status: 500 }
