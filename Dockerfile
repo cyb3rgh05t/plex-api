@@ -13,6 +13,12 @@ COPY next.config.js postcss.config.js tailwind.config.js tsconfig.json ./
 # Install dependencies
 RUN npm install
 
+# Create data directory
+RUN mkdir -p src/data
+
+# Create initial format-config.json
+RUN echo '{"variables":["title","subtitle","progress","type"],"outputFormat":"{title} - {subtitle} ({progress}%)"}' > src/data/format-config.json
+
 # Copy source files
 COPY src ./src
 
@@ -24,18 +30,21 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
+# Create necessary directories
+RUN mkdir -p src/data
+
 # Copy built assets
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/src/data ./src/data
 
 # Set environment variables
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create data directory and set permissions
-RUN mkdir -p /app/src/data && chown -R node:node /app
+# Create volume directory and set permissions
+VOLUME /app/src/data
+RUN chown -R node:node /app
 
 # Switch to non-root user
 USER node
