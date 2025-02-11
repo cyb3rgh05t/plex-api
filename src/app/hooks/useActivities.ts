@@ -1,15 +1,6 @@
 import { useState, useEffect } from "react";
 import { PlexActivity } from "../lib/types";
-
-function logClientSide(
-  level: "log" | "error" | "warn",
-  message: string,
-  data?: any
-) {
-  const timestamp = new Date().toISOString();
-  const logMessage = `[${timestamp}] ${message}`;
-  console[level](logMessage, data || "");
-}
+import { logClientSide } from "../lib/clientLogger";
 
 export function useActivities() {
   const [activities, setActivities] = useState<PlexActivity[]>([]);
