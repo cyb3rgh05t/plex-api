@@ -7,11 +7,11 @@ LABEL org.opencontainers.image.source=https://github.com/cyb3rgh05t/plex-api
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json ./
+COPY package.json ./
 COPY next.config.js postcss.config.js tailwind.config.js tsconfig.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Copy source files
 COPY src ./src
