@@ -1,9 +1,8 @@
-// src/app/components/ConfigPanel.tsx
 import React from "react";
-import { FormatEditor } from "./FormatEditor";
+import FormatEditor from "./FormatEditor";
 import { useFormatConfig } from "../hooks/useFormatConfig";
 
-export function ConfigPanel() {
+export default function ConfigPanel() {
   const { config, saveConfig } = useFormatConfig();
 
   return (

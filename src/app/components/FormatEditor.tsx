@@ -1,5 +1,4 @@
-// src/app/components/FormatEditor.tsx
-import { useState } from "react";
+import React, { useState } from "react";
 import { FormatConfig } from "../lib/types";
 
 export default function FormatEditor({

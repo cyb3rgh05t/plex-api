@@ -1,9 +1,8 @@
-// src/app/page.tsx
 "use client";
 
 import { useState } from "react";
 import ActivityList from "./components/ActivityList";
-import FormatEditor from "./components/FormatEditor";
+import ConfigPanel from "./components/ConfigPanel";
 import { useActivities } from "./hooks/useActivities";
 import { Tabs } from "./components/Tabs";
 
@@ -32,23 +31,7 @@ export default function Home() {
             <ActivityList activities={activities} />
           )
         ) : (
-          <FormatEditor
-            config={{
-              variables: ["title", "subtitle", "progress", "type"],
-              outputFormat: "{title} - {subtitle} ({progress}%)",
-            }}
-            onSave={async (config) => {
-              try {
-                await fetch("/api/config", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(config),
-                });
-              } catch (error) {
-                console.error("Error saving config:", error);
-              }
-            }}
-          />
+          <ConfigPanel />
         )}
       </div>
     </main>
