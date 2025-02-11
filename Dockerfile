@@ -50,7 +50,7 @@ RUN chown -R node:node /app
 USER node
 
 # Expose the port
-EXPOSE 3008
+EXPOSE 3000
 
 # Start the application
 CMD ["npm", "start"]

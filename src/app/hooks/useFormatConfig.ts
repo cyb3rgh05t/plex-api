@@ -1,4 +1,3 @@
-// src/app/hooks/useFormatConfig.ts
 import { useState, useEffect } from "react";
 import { FormatConfig } from "../lib/types";
 
@@ -9,29 +8,44 @@ export function useFormatConfig() {
   });
 
   useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        logClientSide("log", "Fetching format configuration...");
+        const response = await fetch("/api/config");
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        logClientSide("log", "Format config received", data);
+        setConfig(data);
+      } catch (error) {
+        logClientSide("error", "Error fetching config:", error);
+      }
+    };
+
     fetchConfig();
   }, []);
 
-  const fetchConfig = async () => {
-    try {
-      const response = await fetch("/api/config");
-      const data = await response.json();
-      setConfig(data);
-    } catch (error) {
-      console.error("Error fetching config:", error);
-    }
-  };
-
   const saveConfig = async (newConfig: FormatConfig) => {
     try {
-      await fetch("/api/config", {
+      logClientSide("log", "Saving new format configuration...", newConfig);
+      const response = await fetch("/api/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newConfig),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      logClientSide("log", "Format config saved successfully");
       setConfig(newConfig);
     } catch (error) {
-      console.error("Error saving config:", error);
+      logClientSide("error", "Error saving config:", error);
+      throw error;
     }
   };
 

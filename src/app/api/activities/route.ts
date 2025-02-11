@@ -2,12 +2,17 @@ import { NextResponse } from "next/server";
 import { PlexActivity } from "../../lib/types";
 import { logger } from "../../lib/logger";
 
-export async function GET() {
+export async function GET(request: Request) {
   const plexToken = process.env.PLEX_TOKEN;
   const plexServer = process.env.PLEX_SERVER;
 
+  logger.logRequest(request);
+
   try {
-    logger.info("Fetching activities from Plex server", { server: plexServer });
+    logger.debug("Plex API request details", {
+      server: plexServer,
+      endpoint: "/activities",
+    });
 
     const response = await fetch(
       `${plexServer}/activities?X-Plex-Token=${plexToken}`
@@ -19,7 +24,8 @@ export async function GET() {
 
     const data = await response.json();
 
-    // Add null checks and proper type handling
+    logger.debug("Raw Plex API response", { data });
+
     const activities: PlexActivity[] = [];
 
     if (
@@ -27,25 +33,40 @@ export async function GET() {
       Array.isArray(data.MediaContainer.Activity)
     ) {
       activities.push(
-        ...data.MediaContainer.Activity.map((activity: any) => ({
-          title: activity.title || "Unknown Title",
-          subtitle: activity.subtitle || "",
-          progress:
-            typeof activity.progress === "number" ? activity.progress : 0,
-          type: activity.type || "unknown",
-        }))
+        ...data.MediaContainer.Activity.map((activity: any) => {
+          const mappedActivity = {
+            title: activity.title || "Unknown Title",
+            subtitle: activity.subtitle || "",
+            progress:
+              typeof activity.progress === "number" ? activity.progress : 0,
+            type: activity.type || "unknown",
+          };
+          logger.debug("Mapped activity", {
+            original: activity,
+            mapped: mappedActivity,
+          });
+          return mappedActivity;
+        })
       );
+    } else {
+      logger.warn("Unexpected Plex API response structure", { data });
     }
 
-    logger.info("Successfully fetched activities", {
+    logger.info("Activities fetched successfully", {
       count: activities.length,
+      types: activities.map((a) => a.type),
     });
+
+    logger.logResponse(200, { count: activities.length });
     return NextResponse.json(activities);
   } catch (error) {
-    logger.error("Error fetching from Plex", {
-      error: error instanceof Error ? error.message : "Unknown error",
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    logger.error("Failed to fetch activities", {
+      error: errorMessage,
       server: plexServer,
     });
-    return NextResponse.json({ activities: [] }); // Return empty array instead of error
+    logger.logResponse(500, { error: errorMessage });
+    return NextResponse.json({ activities: [] }, { status: 500 });
   }
 }
