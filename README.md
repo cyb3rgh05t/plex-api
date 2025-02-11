@@ -40,7 +40,7 @@ PLEX_SERVER=http://your_plex_server:32400
 docker-compose up --build
 ```
 
-4. Access the application at http://localhost:3000
+4. Access the application at http://localhost:3008
 
 ## Development
 

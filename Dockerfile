@@ -25,7 +25,7 @@ COPY src ./src
 # Build the application
 RUN npm run build
 
-# Production image
+# Production image alpine
 FROM node:18-alpine AS runner
 
 WORKDIR /app
