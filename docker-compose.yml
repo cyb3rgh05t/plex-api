@@ -1,0 +1,19 @@
+---
+version: "3.9"
+## SET GLOBAL HEADER FOR COMPOSER
+services:
+  plex-api:
+    hostname: "plex-api"
+    container_name: "plex-api"
+    environment:
+      - "TZ=Europe/Berlin"
+      - "PLEX_API_PORT=3008"
+      - "PLEX_TOKEN=YOUR_PLEX_TOKEN"
+      - "PLEX_SERVER=YOUR_PLEX_SERVER_URL"
+      - "NODE_ENV=production"
+    image: "ghcr.io/cyb3rgh05t/plex-api:latest"
+    restart: "unless-stopped"
+    ports:
+      - "3008:3008"
+    volumes:
+      - "./plex-api/config:/app/src/data"

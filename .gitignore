@@ -40,3 +40,4 @@ docker-compose.override.yml
 
 # project specific
 src/data/format-config.json
+plex-api.yml
