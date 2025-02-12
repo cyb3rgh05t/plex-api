@@ -7,13 +7,12 @@ services:
     container_name: "plex-api"
     environment:
       - "TZ=Europe/Berlin"
-      - "PLEX_API_PORT=3008"
-      - "PLEX_TOKEN=YOUR_PLEX_TOKEN"
-      - "PLEX_SERVER=YOUR_PLEX_SERVER_URL"
-      - "NODE_ENV=production"
+      - "VITE_PLEX_API_PORT=3005"
+      - "VITE_PLEX_SERVER_URL=https://your-plex-server:32400"
+      - "VITE_PLEX_TOKEN=YOUR-PLEX-TOKEN"
     image: "ghcr.io/cyb3rgh05t/plex-api:latest"
     restart: "unless-stopped"
     ports:
-      - "3008:3008"
+      - "3005:3005"
     volumes:
-      - "./plex-api/config:/app/src/data"
+      - "./plex-api/config:/app"
