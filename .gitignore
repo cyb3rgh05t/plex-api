@@ -6,38 +6,21 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
 # production
 /build
 
+# config
+/config
+
 # misc
 .DS_Store
-*.pem
-.idea/
-.vscode/
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# docker
-docker-compose.override.yml
-
-# project specific
-src/data/format-config.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 plex-api.yml

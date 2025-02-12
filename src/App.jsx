@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from "react";
+import fs from "fs";
+import dotenv from "dotenv";
 import ActivityCard from "./components/ActivityCard";
 import { fetchActivities } from "./services/plexApi";
 import logger from "./utils/logger";
+
+// Load environment from config file
+const envConfig = dotenv.parse(
+  fs.readFileSync(process.env.ENV_FILE || "/app/config/.env")
+);
+for (const k in envConfig) {
+  process.env[k] = envConfig[k];
+}
 
 const App = () => {
   const [activities, setActivities] = useState([]);
