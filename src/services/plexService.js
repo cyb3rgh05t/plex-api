@@ -3,35 +3,33 @@ import Logger from "../utils/logger";
 
 export const fetchPlexActivities = async () => {
   try {
-    Logger.plex("Initiating Plex activities fetch", {
-      serverUrl: config.plexServerUrl?.replace(/:[^:]*@/, ":****@"),
+    Logger.plex("Checking Plex configuration", {
+      hasUrl: !!config.plexServerUrl,
       hasToken: !!config.plexToken,
+      serverUrl: config.plexServerUrl?.replace(/:[^:]*@/, ":****@"),
     });
 
     if (!config.plexServerUrl || !config.plexToken) {
-      throw new Error("Plex configuration missing");
+      throw new Error(
+        `Plex configuration missing - URL: ${!!config.plexServerUrl}, Token: ${!!config.plexToken}`
+      );
     }
 
     const url = `${config.plexServerUrl}/activities?X-Plex-Token=${config.plexToken}`;
-    Logger.debug("Request URL", {
+    Logger.debug("Making request to Plex", {
       url: url.replace(config.plexToken, "[HIDDEN]"),
     });
 
     const response = await fetch(url);
-    Logger.plex("Received response", {
-      status: response.status,
-      ok: response.ok,
-      headers: Object.fromEntries(response.headers),
-    });
 
     if (!response.ok) {
       throw new Error(`Server responded with status: ${response.status}`);
     }
 
     const data = await response.text();
-    Logger.debug("Raw XML response preview", {
-      preview: data.substring(0, 200) + "...",
-      length: data.length,
+    Logger.debug("Received data from Plex", {
+      dataLength: data.length,
+      preview: data.substring(0, 100),
     });
 
     const parser = new DOMParser();
@@ -43,11 +41,7 @@ export const fetchPlexActivities = async () => {
     }
 
     const activities = Array.from(xmlDoc.getElementsByTagName("Activity"))
-      .filter((activity) => {
-        const type = activity.getAttribute("type");
-        Logger.debug("Processing activity", { type });
-        return type === "media.download";
-      })
+      .filter((activity) => activity.getAttribute("type") === "media.download")
       .map((activity) => {
         const attributes = Array.from(activity.attributes);
         const activityData = {};
@@ -60,23 +54,15 @@ export const fetchPlexActivities = async () => {
           activityData[attr.name] = value;
         });
 
-        Logger.debug("Processed activity data", activityData);
         return activityData;
       });
 
     Logger.plex("Successfully processed activities", {
       count: activities.length,
-      types: activities
-        .map((a) => a.type)
-        .filter((v, i, a) => a.indexOf(v) === i),
     });
-
     return activities;
   } catch (error) {
-    Logger.error("Plex activities fetch failed", {
-      message: error.message,
-      stack: error.stack,
-    });
+    Logger.error("Error in fetchPlexActivities:", error);
     throw error;
   }
 };

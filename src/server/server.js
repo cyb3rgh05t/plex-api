@@ -4,6 +4,12 @@ const cors = require("cors");
 const app = express();
 const port = 3005;
 
+console.log("Server starting with environment:", {
+  nodeEnv: process.env.NODE_ENV,
+  hasPlexUrl: !!process.env.REACT_APP_PLEX_SERVER_URL,
+  hasPlexToken: !!process.env.REACT_APP_PLEX_TOKEN,
+});
+
 // ASCII art banner for server start
 const serverBanner = `
 ╔════════════════════════════════════════╗
