@@ -1,5 +1,4 @@
-import config from "../config/config";
-import Logger from "../utils/logger";
+import Logger from "../utils/logger.js";
 
 export const fetchPlexActivities = async () => {
   try {

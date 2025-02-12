@@ -4,7 +4,6 @@ const config = {
   refreshInterval: 15000, // 15 seconds
 };
 
-// Add better error logging
 if (!config.plexServerUrl || !config.plexToken) {
   console.error("Missing Plex configuration:", {
     hasUrl: !!config.plexServerUrl,
