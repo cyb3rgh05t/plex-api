@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig(({ command, mode }) => {
-  // Load env file based on mode
   const env = loadEnv(mode, process.cwd(), "");
 
   return {
@@ -17,11 +16,7 @@ export default defineConfig(({ command, mode }) => {
       host: "0.0.0.0",
       port: 3005,
       strictPort: true,
-      proxy: {}, // Empty proxy to help with host restrictions
-      cors: true, // Enable CORS
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
+      allowedHosts: "all", // This explicitly allows all hosts
     },
     build: {
       outDir: "dist",
