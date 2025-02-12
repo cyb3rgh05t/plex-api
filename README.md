@@ -31,7 +31,7 @@ A React-based web application for monitoring Plex download activities with a dar
 
 ```bash
 git clone https://github.com/cyb3rgh05t/plex-api.git
-cd plex-activity-monitor
+cd plex-api
 ```
 
 2. Create a `.env` file with your Plex credentials:
@@ -156,7 +156,7 @@ Example format:
 ## Project Structure
 
 ```
-plex-activity-monitor/
+plex-api/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── public/
