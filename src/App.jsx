@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import PlexActivity from "./PlexActivity";
 
-function App() {
+export default function App() {
   const [activities, setActivities] = useState([]);
   const [error, setError] = useState(null);
 
