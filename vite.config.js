@@ -13,10 +13,10 @@ export default defineConfig(({ command, mode }) => {
       strictPort: true,
     },
     preview: {
-      host: "0.0.0.0",
+      host: true,
       port: 3005,
       strictPort: true,
-      allowedHosts: "all", // This explicitly allows all hosts
+      allowedHosts: ["plexapi.mystreamnet.club", "localhost", "127.0.0.1"],
     },
     build: {
       outDir: "dist",
