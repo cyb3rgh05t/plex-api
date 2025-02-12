@@ -30,7 +30,7 @@ A React-based web application for monitoring Plex download activities with a dar
 1. Clone the repository:
 
 ```bash
-git clone [repository-url]
+git clone https://github.com/cyb3rgh05t/plex-api.git
 cd plex-activity-monitor
 ```
 
