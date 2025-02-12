@@ -8,37 +8,24 @@ export const fetchPlexActivities = async () => {
       hasToken: !!config.plexToken,
     });
 
-    const url = `${config.plexServerUrl}/activities?X-Plex-Token=${config.plexToken}`;
+    // Ensure we're using HTTP
+    const url =
+      config.plexServerUrl.replace("https://", "http://") +
+      "/activities?X-Plex-Token=" +
+      config.plexToken;
 
     Logger.debug("Request URL:", {
       url: url.replace(config.plexToken, "[HIDDEN]"),
     });
 
-    // Add error handling middleware
     const response = await fetch(url, {
       headers: {
         Accept: "application/xml",
         "X-Plex-Token": config.plexToken,
       },
-      // Add rejectUnauthorized option
-      agent: new (
-        await import("https")
-      ).Agent({
-        rejectUnauthorized: false,
-      }),
-    }).catch((error) => {
-      // If HTTPS fails, try HTTP
-      if (error.message.includes("CERT_")) {
-        Logger.debug("Certificate error, trying HTTP");
-        const httpUrl = url.replace("https://", "http://");
-        return fetch(httpUrl, {
-          headers: {
-            Accept: "application/xml",
-            "X-Plex-Token": config.plexToken,
-          },
-        });
-      }
-      throw error;
+      // Add mode to handle CORS
+      mode: "cors",
+      credentials: "same-origin",
     });
 
     Logger.debug("Response status:", {
