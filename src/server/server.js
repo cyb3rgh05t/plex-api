@@ -1,14 +1,14 @@
-const express = require("express");
-const path = require("path");
-const cors = require("cors");
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import cors from "cors";
+import fetch from "node-fetch";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const port = 3005;
-
-console.log("Server starting with environment:", {
-  nodeEnv: process.env.NODE_ENV,
-  hasPlexUrl: !!process.env.REACT_APP_PLEX_SERVER_URL,
-  hasPlexToken: !!process.env.REACT_APP_PLEX_TOKEN,
-});
 
 // ASCII art banner for server start
 const serverBanner = `
@@ -21,62 +21,65 @@ const serverBanner = `
 app.use(cors());
 app.use(express.json());
 
-// Store the latest activities and format
-let currentActivities = [];
-let currentFormat = "";
-
-// Debug middleware to log all requests
+// Logging middleware
 app.use((req, res, next) => {
   console.log(
-    `🟣 🌐 [API REQUEST] ${new Date().toISOString()} - ${req.method} ${
-      req.path
-    }`
+    `🟣 [API] ${new Date().toISOString()} - ${req.method} ${req.url}`
   );
   next();
 });
 
-// Create API router
-const apiRouter = express.Router();
-
-// API endpoints
-apiRouter.post("/update", (req, res) => {
-  console.log(`🟣 🌐 [API UPDATE] Received request to /api/update`);
+// Proxy endpoint for Plex
+app.get("/api/plex/activities", async (req, res) => {
   try {
-    const { activities, format } = req.body;
-    console.log(`🔵 ℹ️ [UPDATE] Received data:`, {
-      activitiesCount: activities?.length,
-      format,
-      firstActivity: activities?.[0],
-    });
+    console.log("🟣 [PROXY] Forwarding request to Plex server");
 
-    if (!activities || !format) {
-      const error = "Missing required data";
-      console.error(`🔴 ❌ [ERROR] ${error}`);
-      return res.status(400).json({ error });
+    const plexUrl = process.env.REACT_APP_PLEX_SERVER_URL;
+    const plexToken = process.env.REACT_APP_PLEX_TOKEN;
+
+    const response = await fetch(
+      `${plexUrl}/activities?X-Plex-Token=${plexToken}`,
+      {
+        headers: {
+          Accept: "application/xml",
+          "X-Plex-Token": plexToken,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Plex server responded with ${response.status}`);
     }
 
-    currentActivities = activities;
-    currentFormat = format;
-
-    console.log(
-      `🔵 ℹ️ [SUCCESS] Updated activities store with ${activities.length} items`
-    );
-    res.json({
-      success: true,
-      message: `Updated ${activities.length} activities`,
-    });
+    const data = await response.text();
+    res.type("application/xml").send(data);
   } catch (error) {
-    console.error(`🔴 ❌ [ERROR] Update error:`, error);
+    console.error("🔴 [ERROR] Proxy request failed:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-apiRouter.get("/activities", (req, res) => {
+// Store for activities and format
+let currentActivities = [];
+let currentFormat = "";
+
+app.post("/api/update", (req, res) => {
   try {
-    console.log(
-      `🟢 📺 [API] Serving activities, count:`,
-      currentActivities.length
-    );
+    const { activities, format } = req.body;
+    if (!activities || !format) {
+      return res.status(400).json({ error: "Missing required data" });
+    }
+    currentActivities = activities;
+    currentFormat = format;
+    res.json({ success: true });
+  } catch (error) {
+    console.error("🔴 [ERROR] Update error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get("/api/activities", (req, res) => {
+  try {
     res.json(
       currentActivities.map((activity) => ({
         formatted: formatOutput(currentFormat, activity),
@@ -84,35 +87,10 @@ apiRouter.get("/activities", (req, res) => {
       }))
     );
   } catch (error) {
-    console.error(`🔴 ❌ [ERROR] Activities error:`, error);
+    console.error("🔴 [ERROR] Activities error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
-
-// Development endpoint
-if (process.env.NODE_ENV !== "production") {
-  apiRouter.get("/debug", (req, res) => {
-    res.json({
-      endpoints: [
-        {
-          method: "POST",
-          path: "/api/update",
-          description: "Update activities and format",
-        },
-        {
-          method: "GET",
-          path: "/api/activities",
-          description: "Get formatted activities",
-        },
-      ],
-      currentState: {
-        activitiesCount: currentActivities.length,
-        hasFormat: !!currentFormat,
-        format: currentFormat,
-      },
-    });
-  });
-}
 
 function formatOutput(format, activity) {
   let output = format;
@@ -123,21 +101,12 @@ function formatOutput(format, activity) {
   return output;
 }
 
-// Mount API router BEFORE static files
-app.use("/api", apiRouter);
-
-// Serve static files AFTER API routes
+// Serve static files
 app.use(express.static(path.join(__dirname, "../../build")));
 
-// Handle React routing LAST
+// Handle React routing
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../../build", "index.html"));
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(`🔴 ❌ [ERROR] Unhandled error:`, err);
-  res.status(500).json({ error: "Internal server error" });
 });
 
 app.listen(port, () => {

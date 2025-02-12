@@ -1,13 +1,10 @@
 const config = {
-  // Ensure we're using HTTP instead of HTTPS
-  plexServerUrl: (process.env.REACT_APP_PLEX_SERVER_URL || "").replace(
-    "https://",
-    "http://"
-  ),
+  plexServerUrl: process.env.REACT_APP_PLEX_SERVER_URL || "",
   plexToken: process.env.REACT_APP_PLEX_TOKEN || "",
   refreshInterval: 15000, // 15 seconds
 };
 
+// Add better error logging
 if (!config.plexServerUrl || !config.plexToken) {
   console.error("Missing Plex configuration:", {
     hasUrl: !!config.plexServerUrl,

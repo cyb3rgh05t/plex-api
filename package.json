@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A dark mode frontend for monitoring Plex download activities",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -16,13 +17,12 @@
     "autoprefixer": "^10.4.17",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "node-fetch": "^3.3.2"
   },
   "scripts": {
     "start": "node src/server/server.js",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
     "dev:react": "react-scripts start",
     "dev:server": "nodemon src/server/server.js",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:react\""
@@ -49,8 +49,5 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "concurrently": "^8.2.2",
     "nodemon": "^3.0.3"
-  },
-  "engines": {
-    "node": ">=18"
   }
 }

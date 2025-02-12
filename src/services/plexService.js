@@ -3,32 +3,11 @@ import Logger from "../utils/logger";
 
 export const fetchPlexActivities = async () => {
   try {
-    Logger.plex("Starting Plex fetch", {
-      plexUrl: config.plexServerUrl?.replace(/:[^:]*@/, ":****@"),
-      hasToken: !!config.plexToken,
-    });
+    Logger.plex("Starting Plex fetch via proxy");
 
-    // Ensure we're using HTTP
-    const url =
-      config.plexServerUrl.replace("https://", "http://") +
-      "/activities?X-Plex-Token=" +
-      config.plexToken;
+    const response = await fetch("/api/plex/activities");
 
-    Logger.debug("Request URL:", {
-      url: url.replace(config.plexToken, "[HIDDEN]"),
-    });
-
-    const response = await fetch(url, {
-      headers: {
-        Accept: "application/xml",
-        "X-Plex-Token": config.plexToken,
-      },
-      // Add mode to handle CORS
-      mode: "cors",
-      credentials: "same-origin",
-    });
-
-    Logger.debug("Response status:", {
+    Logger.debug("Proxy response status:", {
       status: response.status,
       ok: response.ok,
       statusText: response.statusText,
@@ -81,11 +60,6 @@ export const fetchPlexActivities = async () => {
     Logger.error("Plex fetch error:", {
       message: error.message,
       stack: error.stack,
-      config: {
-        hasUrl: !!config.plexServerUrl,
-        hasToken: !!config.plexToken,
-        url: config.plexServerUrl ? "Set" : "Missing",
-      },
     });
     throw error;
   }
