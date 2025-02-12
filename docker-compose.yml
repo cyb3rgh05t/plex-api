@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  plex-api:
+    hostname: "plex-api"
+    container_name: "plex-api"
+    image: "ghcr.io/cyb3rgh05t/plex-api:latest"
+    environment:
+      - "TZ=Europe/Berlin"
+      - "NODE_ENV=production"
+      - "REACT_APP_PLEX_SERVER_URL=${PLEX_SERVER_URL}"
+      - "REACT_APP_PLEX_TOKEN=${PLEX_TOKEN}"
+    restart: "unless-stopped"
+    ports:
+      - "3005:3005"
