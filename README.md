@@ -1,59 +1,84 @@
-# Plex API Dashboard
+# Plex Activity Monitor
 
-A real-time dashboard for monitoring Plex Media Server download activities. Built with React, Vite, and Tailwind CSS, featuring a dark mode interface and automatic updates.
+A React-based web application for monitoring Plex download activities with a dark mode interface, customizable output formatting, and Docker support.
 
-![Preview](preview.png)
+![Activity Monitor Preview](preview.png)
 
 ## Features
 
-- Real-time monitoring of Plex download activities
-- Dark mode interface
-- Auto-refresh every 15 seconds
-- Progress bars for download tracking
-- Responsive grid layout
-- Docker support
-- HTTPS enabled
-- Debug logging
+- 🎯 Real-time monitoring of Plex download activities
+- 🌙 Dark mode interface
+- 📊 Progress tracking with visual indicators
+- 🔄 Auto-refresh every 15 seconds
+- 🎨 Customizable output format
+- 🚀 REST API for external access
+- 📝 Detailed logging system
+- 💾 Persistent format settings
+- 🐳 Docker support
 
-## Prerequisites
+## Deployment Options
 
-- Node.js 18 or higher
-- Docker (for containerized deployment)
-- Plex Media Server with API access
-- Plex Token for authentication
+### 1. Docker Deployment (Recommended)
 
-## Quick Start
+#### Prerequisites
+
+- Docker
+- Docker Compose
+
+#### Using Docker Compose
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/plex-api
-cd plex-api
+git clone [repository-url]
+cd plex-activity-monitor
 ```
 
-2. Configure environment variables:
+2. Create a `.env` file with your Plex credentials:
+
+```env
+REACT_APP_PLEX_SERVER_URL=https://your-plex-server:32400
+REACT_APP_PLEX_TOKEN=your-plex-token
+```
+
+3. Build and run using docker-compose:
 
 ```bash
-cp .env.example .env
+docker-compose up -d
 ```
 
-Edit `.env` and add your Plex server details:
+4. Access the application at `http://localhost:3005`
 
-```
-VITE_PLEX_SERVER_URL=https://your-plex-server:32400
-VITE_PLEX_TOKEN=YOUR-PLEX-TOKEN
-```
+#### Docker Commands
 
-3. Build and run with Docker:
+- Stop the container:
 
 ```bash
-docker build -t plex-api .
-docker run -p 3005:3005 plex-api
+docker-compose down
 ```
 
-The dashboard will be available at `http://localhost:3005`
+- View logs:
 
-## Development Setup
+```bash
+docker-compose logs -f
+```
+
+- Rebuild the container:
+
+```bash
+docker-compose up -d --build
+```
+
+### 2. Local Development Setup
+
+#### Prerequisites
+
+- Node.js (v14 or higher)
+- NPM (v6 or higher)
+- A Plex Media Server
+- Plex Token for authentication
+
+#### Installation
 
 1. Install dependencies:
 
@@ -61,116 +86,209 @@ The dashboard will be available at `http://localhost:3005`
 npm install
 ```
 
-2. Start development server:
+2. Create a `.env` file in the root directory:
+
+```env
+REACT_APP_PLEX_SERVER_URL=https://your-plex-server:32400
+REACT_APP_PLEX_TOKEN=your-plex-token
+PORT=3005
+```
+
+#### Running the Application
+
+Development Mode:
 
 ```bash
 npm run dev
 ```
 
-3. Build for production:
+Production Mode:
 
 ```bash
 npm run build
+npm start
+```
+
+## API Endpoints
+
+### Get Activities
+
+```http
+GET /api/activities
+```
+
+Returns formatted and raw activity data
+
+### Update Activities
+
+```http
+POST /api/update
+```
+
+Updates the current activities and format
+
+### Debug Information (Development)
+
+```http
+GET /api/debug
+```
+
+Returns server state and available endpoints
+
+## Format Customization
+
+Available variables for custom formats:
+
+- {uuid} - Unique identifier
+- {type} - Activity type
+- {title} - Activity title
+- {subtitle} - Media name
+- {progress} - Download progress
+- {cancellable} - Can be cancelled
+- {userID} - User ID
+
+Example format:
+
+```
+{subtitle} - {progress}% ({title})
 ```
 
 ## Project Structure
 
 ```
-📁 plex-api/
-├── 📄 Dockerfile
-├── 📄 .env
-├── 📄 index.html
-├── 📁 src/
-│   ├── 📄 App.jsx
-│   ├── 📄 main.jsx
-│   ├── 📄 PlexActivity.jsx
-│   └── 📄 index.css
-├── 📄 package.json
-└── 📄 vite.config.js
+plex-activity-monitor/
+├── Dockerfile
+├── docker-compose.yml
+├── public/
+│   ├── favicon.svg
+│   ├── index.html
+│   └── site.webmanifest
+├── src/
+│   ├── components/
+│   │   ├── ActivityCard.jsx
+│   │   ├── ActivityList.jsx
+│   │   ├── Layout.jsx
+│   │   └── Settings.jsx
+│   ├── config/
+│   │   └── config.js
+│   ├── context/
+│   │   └── FormatContext.jsx
+│   ├── services/
+│   │   ├── apiService.js
+│   │   └── plexService.js
+│   ├── utils/
+│   │   └── logger.js
+│   ├── App.jsx
+│   └── index.jsx
+├── server/
+│   └── server.js
+├── .dockerignore
+├── .env.example
+└── package.json
 ```
 
-## Configuration
+## Development
+
+### Available Scripts
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Build Docker image
+npm run docker:build
+
+# Run Docker container
+npm run docker:run
+```
 
 ### Environment Variables
 
-- `VITE_PLEX_SERVER_URL`: Your Plex server URL with port
-- `VITE_PLEX_TOKEN`: Your Plex authentication token
-
-### Port Configuration
-
-The application runs on port 3005 by default. To change this:
-
-1. Update `vite.config.js`
-2. Modify the Dockerfile EXPOSE directive
-3. Update the docker run command with the new port
-
-## API Endpoints
-
-The dashboard connects to the following Plex endpoint:
-
-```
-GET https://{PLEX_SERVER_URL}/activities?X-Plex-Token={TOKEN}
-```
-
-Response format:
-
-```xml
-<MediaContainer size="n">
-  <Activity
-    uuid="..."
-    type="media.download"
-    title="..."
-    subtitle="..."
-    progress="..."
-  />
-  ...
-</MediaContainer>
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-MIT License - feel free to use this project as you wish.
+| Variable                  | Description                    |
+| ------------------------- | ------------------------------ |
+| REACT_APP_PLEX_SERVER_URL | Your Plex server URL           |
+| REACT_APP_PLEX_TOKEN      | Your Plex authentication token |
+| PORT                      | Server port (default: 3005)    |
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Connection Errors**
+1. **Docker Issues**
 
-   - Verify Plex server URL and port
-   - Check if Plex token is valid
-   - Ensure HTTPS certificate is trusted
+   - Ensure Docker daemon is running
+   - Check container logs: `docker-compose logs -f`
+   - Verify environment variables in .env file
 
-2. **Docker Issues**
+2. **API 404 Errors**
 
-   - Check if port 3005 is available
-   - Verify Docker daemon is running
-   - Check container logs: `docker logs plex-api`
+   - Ensure the server is running
+   - Check if the correct port is being used
+   - Verify API endpoints are not being blocked
 
-3. **Display Issues**
+3. **Plex Connection Issues**
+
+   - Verify Plex server URL is correct
+   - Ensure Plex token is valid
+   - Check network connectivity
+
+4. **Format Not Saving**
    - Clear browser cache
-   - Check console for JavaScript errors
-   - Verify Tailwind CSS is building correctly
+   - Check localStorage permissions
+   - Verify browser console for errors
 
-### Debug Logging
+### Debug Mode
 
-The application logs activities to the console. Access these logs:
+Access the debug endpoint for detailed information:
 
-- In browser: Open DevTools (F12) > Console
-- In Docker: `docker logs plex-api`
+```http
+GET /api/debug
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Built with React
+- Styled with Tailwind CSS
+- Express.js for backend
+- Docker for containerization
+- Plex Media Server API
 
 ## Support
 
-For issues and feature requests, please open an issue on the GitHub repository.
+For support:
 
----
+1. Check the troubleshooting section
+2. Review existing issues
+3. Create a new issue with detailed information about your problem
 
-Built with ❤️ for the Plex community
+## Security
+
+- All sensitive information should be stored in the .env file
+- The .env file is included in .gitignore and .dockerignore
+- API endpoints are protected by Plex token authentication
+- Docker container runs with minimal permissions
+
+## Updates and Maintenance
+
+- The application auto-refreshes data every 15 seconds
+- Docker containers can be configured to auto-restart
+- Use `docker-compose pull` to update to the latest version
+- Check the releases page for changelog and updates
