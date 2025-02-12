@@ -3,33 +3,61 @@ import Logger from "../utils/logger";
 
 export const fetchPlexActivities = async () => {
   try {
-    Logger.plex("Checking Plex configuration", {
-      hasUrl: !!config.plexServerUrl,
+    Logger.plex("Starting Plex fetch", {
+      plexUrl: config.plexServerUrl?.replace(/:[^:]*@/, ":****@"),
       hasToken: !!config.plexToken,
-      serverUrl: config.plexServerUrl?.replace(/:[^:]*@/, ":****@"),
     });
 
-    if (!config.plexServerUrl || !config.plexToken) {
-      throw new Error(
-        `Plex configuration missing - URL: ${!!config.plexServerUrl}, Token: ${!!config.plexToken}`
-      );
-    }
-
     const url = `${config.plexServerUrl}/activities?X-Plex-Token=${config.plexToken}`;
-    Logger.debug("Making request to Plex", {
+
+    Logger.debug("Request URL:", {
       url: url.replace(config.plexToken, "[HIDDEN]"),
     });
 
-    const response = await fetch(url);
+    // Add error handling middleware
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/xml",
+        "X-Plex-Token": config.plexToken,
+      },
+      // Add rejectUnauthorized option
+      agent: new (
+        await import("https")
+      ).Agent({
+        rejectUnauthorized: false,
+      }),
+    }).catch((error) => {
+      // If HTTPS fails, try HTTP
+      if (error.message.includes("CERT_")) {
+        Logger.debug("Certificate error, trying HTTP");
+        const httpUrl = url.replace("https://", "http://");
+        return fetch(httpUrl, {
+          headers: {
+            Accept: "application/xml",
+            "X-Plex-Token": config.plexToken,
+          },
+        });
+      }
+      throw error;
+    });
+
+    Logger.debug("Response status:", {
+      status: response.status,
+      ok: response.ok,
+      statusText: response.statusText,
+    });
 
     if (!response.ok) {
-      throw new Error(`Server responded with status: ${response.status}`);
+      throw new Error(
+        `HTTP error! status: ${response.status} - ${response.statusText}`
+      );
     }
 
     const data = await response.text();
-    Logger.debug("Received data from Plex", {
-      dataLength: data.length,
-      preview: data.substring(0, 100),
+
+    Logger.debug("Response data preview:", {
+      length: data.length,
+      preview: data.substring(0, 200),
     });
 
     const parser = new DOMParser();
@@ -57,12 +85,21 @@ export const fetchPlexActivities = async () => {
         return activityData;
       });
 
-    Logger.plex("Successfully processed activities", {
+    Logger.plex("Successfully fetched activities", {
       count: activities.length,
     });
+
     return activities;
   } catch (error) {
-    Logger.error("Error in fetchPlexActivities:", error);
+    Logger.error("Plex fetch error:", {
+      message: error.message,
+      stack: error.stack,
+      config: {
+        hasUrl: !!config.plexServerUrl,
+        hasToken: !!config.plexToken,
+        url: config.plexServerUrl ? "Set" : "Missing",
+      },
+    });
     throw error;
   }
 };
