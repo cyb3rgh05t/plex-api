@@ -79,8 +79,8 @@ npm run build
 📁 plex-api/
 ├── 📄 Dockerfile
 ├── 📄 .env
+├── 📄 index.html
 ├── 📁 src/
-│   ├── 📄 index.html
 │   ├── 📄 App.jsx
 │   ├── 📄 main.jsx
 │   ├── 📄 PlexActivity.jsx
