@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,16 +12,28 @@ const PORT = 3005;
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, "dist")));
 
-// Log environment variables on startup (without exposing sensitive data)
-console.log("Starting server with configuration:");
-console.log("PLEX_SERVER_URL configured:", !!process.env.VITE_PLEX_SERVER_URL);
-console.log("PLEX_TOKEN configured:", !!process.env.VITE_PLEX_TOKEN);
-
-// Handle all routes for SPA
+// Inject environment variables into HTML
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+  const indexPath = path.join(__dirname, "dist", "index.html");
+  let html = fs.readFileSync(indexPath, "utf8");
+
+  // Create environment variables object
+  const env = {
+    VITE_PLEX_SERVER_URL: process.env.VITE_PLEX_SERVER_URL,
+    VITE_PLEX_TOKEN: process.env.VITE_PLEX_TOKEN,
+  };
+
+  // Inject environment variables before closing body tag
+  const envScript = `<script>window._env_ = ${JSON.stringify(env)};</script>`;
+  html = html.replace("</body>", `${envScript}</body>`);
+
+  res.send(html);
 });
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
+  console.log("Environment variables configured:", {
+    PLEX_SERVER_URL: !!process.env.VITE_PLEX_SERVER_URL,
+    PLEX_TOKEN: !!process.env.VITE_PLEX_TOKEN,
+  });
 });

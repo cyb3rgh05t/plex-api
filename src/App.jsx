@@ -6,19 +6,24 @@ function App() {
   const [activities, setActivities] = useState([]);
   const [error, setError] = useState(null);
 
+  // Get environment variables from window._env_ (injected by server)
+  const PLEX_SERVER_URL = window._env_?.VITE_PLEX_SERVER_URL;
+  const PLEX_TOKEN = window._env_?.VITE_PLEX_TOKEN;
+
   const fetchActivities = async () => {
     try {
-      console.log("Fetching from:", import.meta.env.VITE_PLEX_SERVER_URL);
+      if (!PLEX_SERVER_URL || !PLEX_TOKEN) {
+        throw new Error("Plex server URL or token not configured");
+      }
 
-      const response = await axios.get(
-        `${import.meta.env.VITE_PLEX_SERVER_URL}/activities`,
-        {
-          headers: {
-            "X-Plex-Token": import.meta.env.VITE_PLEX_TOKEN,
-            Accept: "application/xml",
-          },
-        }
-      );
+      console.log("Fetching from:", PLEX_SERVER_URL);
+
+      const response = await axios.get(`${PLEX_SERVER_URL}/activities`, {
+        headers: {
+          "X-Plex-Token": PLEX_TOKEN,
+          Accept: "application/xml",
+        },
+      });
 
       console.log("Raw response:", response.data);
 
@@ -85,15 +90,10 @@ function App() {
       <div className="mt-4 text-gray-400 text-sm">
         Environment check:
         <br />
-        Server URL: {import.meta.env.VITE_PLEX_SERVER_URL || "Not set"}
+        Server URL: {PLEX_SERVER_URL || "Not set"}
         <br />
-        Token Length:{" "}
-        {import.meta.env.VITE_PLEX_TOKEN
-          ? import.meta.env.VITE_PLEX_TOKEN.length
-          : "Not set"}
+        Token Set: {PLEX_TOKEN ? "Yes" : "No"}
       </div>
     </div>
   );
 }
-
-export default App;
