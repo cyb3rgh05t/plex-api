@@ -1,11 +1,12 @@
-import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
+# vite.config.js
+import { defineConfig, loadEnv } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig(({ command, mode }) => {
   // Load env file based on mode
-  const env = loadEnv(mode, process.cwd(), "");
-
+  const env = loadEnv(mode, process.cwd(), '')
+  
   return {
     plugins: [react()],
     server: {
@@ -14,27 +15,28 @@ export default defineConfig(({ command, mode }) => {
       strictPort: true,
     },
     preview: {
-      host: true,
+      host: '0.0.0.0',
       port: 3005,
       strictPort: true,
+      proxy: {},  // Empty proxy to help with host restrictions
+      cors: true, // Enable CORS
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
     },
     build: {
-      outDir: "dist",
+      outDir: 'dist',
       sourcemap: true,
-      // Handle environment variables
       rollupOptions: {
         output: {
           manualChunks: {
-            vendor: ["react", "react-dom"],
+            vendor: ['react', 'react-dom'],
           },
         },
       },
     },
     define: {
-      "process.env.VITE_PLEX_SERVER_URL": JSON.stringify(
-        env.VITE_PLEX_SERVER_URL
-      ),
-      "process.env.VITE_PLEX_TOKEN": JSON.stringify(env.VITE_PLEX_TOKEN),
+      'process.env.VITE_PLEX_SERVER_URL': JSON.stringify(env.VITE_PLEX_SERVER_URL),
+      'process.env.VITE_PLEX_TOKEN': JSON.stringify(env.VITE_PLEX_TOKEN),
     },
-  };
-});
+}
