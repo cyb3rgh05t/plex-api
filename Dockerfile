@@ -4,7 +4,7 @@ FROM node:18-alpine
 LABEL maintainer=cyb3rgh05t
 LABEL org.opencontainers.image.source=https://github.com/cyb3rgh05t/plex-api
 
-DIR /app
+WORKDIR /app
 
 COPY package*.json ./
 
