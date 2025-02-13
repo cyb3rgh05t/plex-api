@@ -168,6 +168,37 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../../build", "index.html"));
 });
 
+app.get("/api/activities", (req, res) => {
+  try {
+    if (!currentActivities || currentActivities.length === 0) {
+      return res.status(404).json({ error: "No activities found" });
+    }
+
+    // Format activities based on the current format
+    const formattedActivities = currentActivities.map((activity) => {
+      let formattedOutput = currentFormat;
+      Object.keys(activity).forEach((key) => {
+        const regex = new RegExp(`{${key}}`, "g");
+        formattedOutput = formattedOutput.replace(regex, activity[key]);
+      });
+
+      return {
+        raw: activity,
+        formatted: formattedOutput,
+      };
+    });
+
+    res.json({
+      count: formattedActivities.length,
+      format: currentFormat,
+      activities: formattedActivities,
+    });
+  } catch (error) {
+    logInfo("ERROR", "Failed to retrieve activities:", error);
+    res.status(500).json({ error: "Failed to retrieve activities" });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   logInfo("ERROR", "Unhandled error:", err);

@@ -90,8 +90,6 @@ jobs:
             ghcr.io/${{ steps.prep.outputs.tags }}
           build-args: |
             COMMIT_TAG=${{ github.sha }}
-            REACT_APP_PLEX_SERVER_URL=${{ secrets.PLEX_SERVER_URL }}
-            REACT_APP_PLEX_TOKEN=${{ secrets.PLEX_TOKEN }}
           labels: |
             org.opencontainers.image.title=${{ steps.prep.outputs.title }}
             org.opencontainers.image.version=${{ steps.prep.outputs.version }}

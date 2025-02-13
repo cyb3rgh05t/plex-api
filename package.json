@@ -53,9 +53,13 @@
     "nodemon": "^3.0.3"
   },
   "author": "cyb3rgh05t",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/cyb3rgh05t/plex-api"
   },
-  "license": "MIT"
+  "bugs": {
+    "url": "https://github.com/cyb3rgh05t/plex-api/issues"
+  },
+  "homepage": "https://github.com/cyb3rgh05t/plex-api#readme"
 }

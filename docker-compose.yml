@@ -16,7 +16,3 @@ services:
 volumes:
   plex-api-config:
     name: plex-api-config
-
-networks:
-  proxy:
-    external: true
