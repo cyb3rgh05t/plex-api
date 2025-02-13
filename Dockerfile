@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine as build
+FROM node:23-alpine as build
 
 LABEL maintainer=cyb3rgh05t
 LABEL org.opencontainers.image.source=https://github.com/cyb3rgh05t/plex-api
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine
+FROM node:23-alpine
 
 WORKDIR /app
 
