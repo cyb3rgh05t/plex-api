@@ -1,50 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Layout } from "./components/Layout";
 import { ActivityList } from "./components/ActivityList";
 import { Settings } from "./components/Settings";
 import { ApiEndpoints } from "./components/ApiEndpoints";
-import { Setup } from "./components/Setup";
-import Logger from "./utils/logger.js";
+import { PlexSetup } from "./components/PlexSetup";
 
 const App = () => {
   const [activeTab, setActiveTab] = useState("activities");
-  const [isConfigured, setIsConfigured] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkConfiguration = async () => {
-      try {
-        const response = await fetch("/api/config");
-        const data = await response.json();
-        setIsConfigured(!!data.serverUrl && !!data.token);
-      } catch (error) {
-        Logger.error("Failed to check configuration:", error);
-        setIsConfigured(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkConfiguration();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[200px]">
-          <div className="text-white text-xl">Loading...</div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!isConfigured) {
-    return (
-      <Layout>
-        <Setup />
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
@@ -71,6 +33,16 @@ const App = () => {
             Settings
           </button>
           <button
+            onClick={() => setActiveTab("plexsetup")}
+            className={`py-3 px-6 text-white font-medium ${
+              activeTab === "plexsetup"
+                ? "border-b-2 border-blue-500"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            Plex Setup
+          </button>
+          <button
             onClick={() => setActiveTab("api")}
             className={`py-3 px-6 text-white font-medium ${
               activeTab === "api"
@@ -85,6 +57,8 @@ const App = () => {
           <ActivityList />
         ) : activeTab === "settings" ? (
           <Settings />
+        ) : activeTab === "plexsetup" ? (
+          <PlexSetup />
         ) : (
           <ApiEndpoints />
         )}

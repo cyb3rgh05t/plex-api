@@ -29,7 +29,6 @@ const configManager = {
   },
   async write(config) {
     try {
-      // Ensure directory exists
       await fs.mkdir(path.dirname(CONFIG_PATH), { recursive: true });
       await fs.writeFile(CONFIG_PATH, JSON.stringify(config, null, 2));
     } catch (error) {
@@ -48,11 +47,28 @@ app.use((req, res, next) => {
   next();
 });
 
+// API Routes
+const apiRouter = express.Router();
+
+// Get activities endpoint
+apiRouter.get("/activities", (req, res) => {
+  try {
+    res.json(
+      currentActivities.map((activity) => ({
+        formatted: formatOutput(currentFormat, activity),
+        raw: activity,
+      }))
+    );
+  } catch (error) {
+    logInfo("ERROR", "Activities error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Test connection endpoint
-app.post("/api/test-connection", async (req, res) => {
+apiRouter.post("/test-connection", async (req, res) => {
   try {
     const { serverUrl, token } = req.body;
-
     if (!serverUrl || !token) {
       throw new Error("Server URL and token are required");
     }
@@ -81,7 +97,7 @@ app.post("/api/test-connection", async (req, res) => {
 });
 
 // Config management endpoints
-app.post("/api/config", async (req, res) => {
+apiRouter.post("/config", async (req, res) => {
   try {
     const { serverUrl, token } = req.body;
     if (!serverUrl || !token) {
@@ -94,7 +110,7 @@ app.post("/api/config", async (req, res) => {
   }
 });
 
-app.get("/api/config", async (req, res) => {
+apiRouter.get("/config", async (req, res) => {
   try {
     const config = await configManager.read();
     res.json(config || {});
@@ -104,7 +120,7 @@ app.get("/api/config", async (req, res) => {
 });
 
 // Plex activities endpoint
-app.get("/api/plex/activities", async (req, res) => {
+apiRouter.get("/plex/activities", async (req, res) => {
   try {
     const config = await configManager.read();
     if (!config) {
@@ -141,11 +157,8 @@ app.get("/api/plex/activities", async (req, res) => {
   }
 });
 
-// Store for activities and format
-let currentActivities = [];
-let currentFormat = "";
-
-app.post("/api/update", (req, res) => {
+// Update endpoint
+apiRouter.post("/update", (req, res) => {
   try {
     const { activities, format } = req.body;
     if (!activities || !format) {
@@ -160,21 +173,29 @@ app.post("/api/update", (req, res) => {
   }
 });
 
-// Serve static files
+// Helper function for formatting output
+function formatOutput(format, activity) {
+  let output = format;
+  Object.keys(activity).forEach((key) => {
+    const regex = new RegExp(`{${key}}`, "g");
+    output = output.replace(regex, activity[key]);
+  });
+  return output;
+}
+
+// Mount API routes
+app.use("/api", apiRouter);
+
+// Store for activities and format
+let currentActivities = [];
+let currentFormat = "";
+
+// Serve static files AFTER API routes
 app.use(express.static(path.join(__dirname, "../../build")));
 
-// Handle React routing
+// Handle React routing - should be last
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../../build", "index.html"));
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  logInfo("ERROR", "Unhandled error:", err);
-  res.status(500).json({
-    error: "Internal server error",
-    message: err.message,
-  });
 });
 
 const serverBanner = `
@@ -182,6 +203,8 @@ const serverBanner = `
 ║                                                    ║
 ║             PLEX ACTIVITY MONITOR                  ║
 ║                                                    ║
+║                                                    ║
+║                 by cyb3rgh05t                      ║
 ╚════════════════════════════════════════════════════╝`;
 
 const endpointsBanner = `
@@ -199,7 +222,7 @@ const endpointsBanner = `
     └── Get current Plex configuration`;
 
 app.listen(port, () => {
-  console.clear(); // Clear console before printing banner
+  console.clear();
   console.log(serverBanner);
   console.log("\n🚀 Server Information:");
   console.log("├── Status: Running");

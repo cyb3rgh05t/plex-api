@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Logger from "../utils/logger.js";
 
-export const Setup = () => {
+export const PlexSetup = () => {
   const [plexConfig, setPlexConfig] = useState({
     serverUrl: "",
     token: "",
@@ -99,9 +99,6 @@ export const Setup = () => {
         type: "success",
         message: "Configuration saved successfully!",
       });
-
-      // Optionally refresh the page after successful save
-      // setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       setStatus({
         type: "error",
@@ -120,7 +117,7 @@ export const Setup = () => {
     <div className="max-w-2xl mx-auto">
       <div className="bg-gray-800 rounded-lg p-6">
         <h2 className="text-xl font-bold text-white mb-6">
-          Initial Plex Server Setup
+          Plex Server Configuration
         </h2>
 
         {/* Status Notification */}
