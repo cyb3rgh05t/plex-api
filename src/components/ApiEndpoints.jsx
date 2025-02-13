@@ -3,6 +3,10 @@ import React from "react";
 export const ApiEndpoints = () => {
   const frontendUrl = window.location.origin;
 
+  const handleTryEndpoint = (path) => {
+    window.open(`${frontendUrl}${path}`, "_blank");
+  };
+
   const endpoints = [
     {
       method: "GET",
@@ -142,6 +146,29 @@ export const ApiEndpoints = () => {
             <code className="text-blue-400 bg-gray-900 px-2 py-1 rounded">
               {endpoint.path}
             </code>
+            {endpoint.method === "GET" && (
+              <button
+                onClick={() => handleTryEndpoint(endpoint.path)}
+                className="ml-4 px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center"
+                title="Try this endpoint"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+                Check Response
+              </button>
+            )}
           </div>
 
           <p className="text-gray-300 mb-4">{endpoint.description}</p>

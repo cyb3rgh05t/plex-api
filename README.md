@@ -3,6 +3,8 @@
 A React-based web application for monitoring Plex download activities with a dark mode interface, customizable output formatting, and API endpoints.
 
 ![Activity Monitor Preview](preview.png)
+![Activity Monitor Preview](preview1.png)
+![Activity Monitor Preview](preview2.png)
 
 ## Features
 

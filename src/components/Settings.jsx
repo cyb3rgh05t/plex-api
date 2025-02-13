@@ -98,10 +98,11 @@ export const Settings = () => {
           </h3>
           <div className="space-y-2">
             <div className="bg-gray-700 p-3 rounded-lg text-white">
-              Format: {format}
+              {format}
             </div>
+            <h4 className="text-md text-white mb-2">Preview</h4>
             <div className="bg-gray-700 p-3 rounded-lg text-blue-400">
-              Preview: {formatOutput(format, sampleActivity)}
+              {formatOutput(format, sampleActivity)}
             </div>
           </div>
         </div>
@@ -139,9 +140,12 @@ export const Settings = () => {
               className="w-full bg-gray-700 text-white p-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
             />
             {newFormat && (
-              <div className="bg-gray-700 p-3 rounded-lg text-blue-400">
-                Preview: {formatOutput(newFormat, sampleActivity)}
-              </div>
+              <>
+                <h4 className="text-md text-white mb-2">Preview</h4>
+                <div className="bg-gray-700 p-3 rounded-lg text-blue-400">
+                  {formatOutput(newFormat, sampleActivity)}
+                </div>
+              </>
             )}
             <div className="text-sm text-gray-400">
               Click on variables above to add them to your format
