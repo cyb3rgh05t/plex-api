@@ -1,13 +1,67 @@
 import React from "react";
 
 export const ApiEndpoints = () => {
+  const frontendUrl = window.location.origin;
+
+  const handleTryEndpoint = (path) => {
+    window.open(`${frontendUrl}${path}`, "_blank");
+  };
+
   const endpoints = [
+    {
+      method: "GET",
+      path: "/api/plex/activities",
+      description: "Fetch Plex download activities",
+      details:
+        "Retrieves current download activities from your Plex server using stored configuration.",
+      responseFormat: {
+        type: "application/xml",
+        description:
+          "Raw XML response from Plex server containing activity data",
+      },
+    },
+    {
+      method: "POST",
+      path: "/api/config",
+      description: "Save Plex configuration",
+      details: "Saves or updates the Plex server configuration.",
+      requestBody: {
+        serverUrl: "Plex server URL (e.g., http://your-plex-server:32400)",
+        token: "Your Plex authentication token",
+      },
+      successResponse: {
+        success: true,
+      },
+    },
+    {
+      method: "GET",
+      path: "/api/config",
+      description: "Get current Plex configuration",
+      details: "Retrieves the current Plex server configuration.",
+      responseFormat: {
+        serverUrl: "Current Plex server URL",
+        token: "Current Plex token",
+      },
+    },
+    {
+      method: "POST",
+      path: "/api/test-connection",
+      description: "Test Plex connection",
+      details: "Tests the connection to Plex server with provided credentials.",
+      requestBody: {
+        serverUrl: "Plex server URL to test",
+        token: "Plex token to test",
+      },
+      successResponse: {
+        success: true,
+      },
+    },
     {
       method: "POST",
       path: "/api/update",
       description: "Update activities and format",
       details:
-        "Expects a JSON payload with 'activities' array and 'format' string. Used to update the server-side activities store.",
+        "Updates the server-side activities store and formatting template.",
       requestBody: {
         activities: "Array of activity objects",
         format: "String template for formatting activities",
@@ -20,7 +74,7 @@ export const ApiEndpoints = () => {
     {
       method: "GET",
       path: "/api/activities",
-      description: "Retrieve current activities",
+      description: "Retrieve formatted activities",
       details:
         "Returns a list of activities with both raw and formatted outputs based on the current format.",
       responseFormat: [
@@ -51,6 +105,26 @@ export const ApiEndpoints = () => {
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold text-white mb-6">API Endpoints</h2>
 
+      {/* Frontend URL Card */}
+      <div className="bg-gray-800 rounded-lg p-6 mb-6 shadow-lg">
+        <h3 className="text-lg font-semibold text-white mb-4">Frontend URL</h3>
+        <div className="flex items-center bg-gray-900 p-3 rounded">
+          <code className="text-blue-400 flex-grow">{frontendUrl}</code>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(frontendUrl);
+            }}
+            className="ml-4 px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors"
+            title="Copy to clipboard"
+          >
+            Copy
+          </button>
+        </div>
+        <p className="text-gray-400 mt-2 text-sm">
+          Base URL for all API endpoints
+        </p>
+      </div>
+
       {endpoints.map((endpoint, index) => (
         <div
           key={endpoint.path}
@@ -72,6 +146,29 @@ export const ApiEndpoints = () => {
             <code className="text-blue-400 bg-gray-900 px-2 py-1 rounded">
               {endpoint.path}
             </code>
+            {endpoint.method === "GET" && (
+              <button
+                onClick={() => handleTryEndpoint(endpoint.path)}
+                className="ml-4 px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center"
+                title="Try this endpoint"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+                Check Response
+              </button>
+            )}
           </div>
 
           <p className="text-gray-300 mb-4">{endpoint.description}</p>
@@ -108,6 +205,17 @@ export const ApiEndpoints = () => {
               </h4>
               <pre className="bg-gray-900 p-3 rounded text-blue-300">
                 {JSON.stringify(endpoint.responseExample, null, 2)}
+              </pre>
+            </div>
+          )}
+
+          {endpoint.successResponse && (
+            <div>
+              <h4 className="text-white font-semibold mb-2">
+                Success Response
+              </h4>
+              <pre className="bg-gray-900 p-3 rounded text-blue-300">
+                {JSON.stringify(endpoint.successResponse, null, 2)}
               </pre>
             </div>
           )}

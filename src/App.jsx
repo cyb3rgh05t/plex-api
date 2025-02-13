@@ -3,6 +3,7 @@ import { Layout } from "./components/Layout";
 import { ActivityList } from "./components/ActivityList";
 import { Settings } from "./components/Settings";
 import { ApiEndpoints } from "./components/ApiEndpoints";
+import { PlexSetup } from "./components/PlexSetup";
 
 const App = () => {
   const [activeTab, setActiveTab] = useState("activities");
@@ -32,6 +33,16 @@ const App = () => {
             Settings
           </button>
           <button
+            onClick={() => setActiveTab("plexsetup")}
+            className={`py-3 px-6 text-white font-medium ${
+              activeTab === "plexsetup"
+                ? "border-b-2 border-blue-500"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            Plex Setup
+          </button>
+          <button
             onClick={() => setActiveTab("api")}
             className={`py-3 px-6 text-white font-medium ${
               activeTab === "api"
@@ -46,6 +57,8 @@ const App = () => {
           <ActivityList />
         ) : activeTab === "settings" ? (
           <Settings />
+        ) : activeTab === "plexsetup" ? (
+          <PlexSetup />
         ) : (
           <ApiEndpoints />
         )}

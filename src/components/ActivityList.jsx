@@ -3,8 +3,8 @@ import { ActivityCard } from "./ActivityCard";
 import { fetchPlexActivities } from "../services/plexService";
 import { updateActivitiesAPI } from "../services/apiService";
 import { useFormat } from "../context/FormatContext";
-import config from "../config/config";
-import Logger from "../utils/logger";
+import config from "../config/config.js";
+import Logger from "../utils/logger.js";
 
 export const ActivityList = () => {
   const [activities, setActivities] = useState([]);
