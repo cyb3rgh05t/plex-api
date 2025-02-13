@@ -7,8 +7,16 @@ services:
     environment:
       - "TZ=Europe/Berlin"
       - "NODE_ENV=production"
-      - "REACT_APP_PLEX_SERVER_URL=${PLEX_SERVER_URL}"
-      - "REACT_APP_PLEX_TOKEN=${PLEX_TOKEN}"
     restart: "unless-stopped"
     ports:
       - "3005:3005"
+    volumes:
+      - plex-api-config:/app/config
+
+volumes:
+  plex-api-config:
+    name: plex-api-config
+
+networks:
+  proxy:
+    external: true

@@ -30,5 +30,9 @@ RUN npm install node-fetch
 COPY --from=build /app/build ./build
 COPY --from=build /app/src/server ./src/server
 
+# Create config directory
+RUN mkdir -p /app/config
+
 EXPOSE 3005
+
 CMD ["node", "src/server/server.js"]

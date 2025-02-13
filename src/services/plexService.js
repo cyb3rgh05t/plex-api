@@ -6,21 +6,20 @@ export const fetchPlexActivities = async () => {
 
     const response = await fetch("/api/plex/activities");
 
-    Logger.debug("Proxy response status:", {
+    Logger.debug("Response status:", {
       status: response.status,
       ok: response.ok,
       statusText: response.statusText,
     });
 
     if (!response.ok) {
-      throw new Error(
-        `HTTP error! status: ${response.status} - ${response.statusText}`
-      );
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch activities");
     }
 
     const data = await response.text();
 
-    Logger.debug("Response data preview:", {
+    Logger.debug("Response data:", {
       length: data.length,
       preview: data.substring(0, 200),
     });
@@ -52,6 +51,12 @@ export const fetchPlexActivities = async () => {
 
     Logger.plex("Successfully fetched activities", {
       count: activities.length,
+      firstActivity: activities[0]
+        ? {
+            type: activities[0].type,
+            progress: activities[0].progress,
+          }
+        : null,
     });
 
     return activities;
@@ -60,6 +65,30 @@ export const fetchPlexActivities = async () => {
       message: error.message,
       stack: error.stack,
     });
+    throw error;
+  }
+};
+
+export const testPlexConnection = async (serverUrl, token) => {
+  try {
+    Logger.plex("Testing Plex connection");
+
+    const response = await fetch("/api/test-connection", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ serverUrl, token }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Connection test failed");
+    }
+
+    return true;
+  } catch (error) {
+    Logger.error("Connection test failed:", error);
     throw error;
   }
 };
