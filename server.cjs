@@ -893,8 +893,8 @@ app.get("/health", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3006;
-app.listen(PORT, () => {
-  console.log(`Proxy server running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Proxy server running on http://0.0.0.0:${PORT}`);
   console.log("Current configuration:", getConfig());
   console.log("API endpoints:");
   console.log("  - GET /api/downloads");

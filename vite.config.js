@@ -6,6 +6,7 @@ export default defineConfig({
   root: ".", // explicitly set root directory
   publicDir: "public", // specify public directory
   server: {
+    host: "0.0.0.0",
     port: 3005,
     proxy: {
       "/api/plex": {
