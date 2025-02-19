@@ -1,8 +1,43 @@
+# Dependency directories
 node_modules
 npm-debug.log
-Dockerfile
-.dockerignore
+
+# Build output
+dist
+build
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Version control
 .git
 .gitignore
-README.md
-.env
+
+# Logs
+logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.bak
+
+# Backup files
+*.backup
+
+# Docker
+Dockerfile
+.dockerignore

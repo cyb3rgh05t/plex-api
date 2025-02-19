@@ -1,38 +1,29 @@
-# Build stage
-FROM node:18-alpine as build
+# Use an official Node runtime as the base image
+FROM node:20-alpine
 
 LABEL maintainer=cyb3rgh05t
-LABEL org.opencontainers.image.source=https://github.com/cyb3rgh05t/plex-api
+LABEL org.opencontainers.image.source https://github.com/cyb3rgh05t/plex-api
 
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy package files
+# Copy package.json and package-lock.json (if available)
 COPY package*.json ./
+
+# Install project dependencies
 RUN npm install
 
-# Copy source code
+# Copy the rest of the application code
 COPY . .
 
-# Build the app
+# Build the application
 RUN npm run build
 
-# Production stage
-FROM node:18-alpine
+# Expose the port the app runs on
+EXPOSE 3005 3006
 
-WORKDIR /app
+# Install concurrently to run multiple commands
+RUN npm install -g concurrently
 
-# Copy package files and install production dependencies
-COPY package*.json ./
-RUN npm install --omit=dev
-RUN npm install node-fetch
-
-# Copy built app and server files
-COPY --from=build /app/build ./build
-COPY --from=build /app/src/server ./src/server
-
-# Create config directory
-RUN mkdir -p /app/config
-
-EXPOSE 3005
-
-CMD ["node", "src/server/server.js"]
+# Command to run the application
+CMD ["npm", "run", "dev"]

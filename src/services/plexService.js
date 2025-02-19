@@ -1,94 +1,111 @@
-import Logger from "../utils/logger.js";
+import axios from "axios";
+import { logError, logInfo } from "../utils/logger";
 
-export const fetchPlexActivities = async () => {
+const PROXY_BASE_URL = "http://localhost:3006";
+
+const plexAxios = axios.create({
+  baseURL: `${PROXY_BASE_URL}/api/plex`,
+  timeout: 30000, // Increased from 10000 to 30000ms (30 seconds)
+  timeoutErrorMessage: "Connection to Plex server timed out",
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
+});
+
+export const testPlexConnection = async (plexUrl, plexToken) => {
   try {
-    Logger.plex("Starting Plex fetch via proxy");
+    logInfo("Testing Plex connection...", { url: plexUrl });
 
-    const response = await fetch("/api/plex/activities");
-
-    Logger.debug("Response status:", {
-      status: response.status,
-      ok: response.ok,
-      statusText: response.statusText,
+    // Configure the proxy with both URL and token
+    await axios.post(`${PROXY_BASE_URL}/api/config`, {
+      plexUrl,
+      plexToken,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch activities");
-    }
-
-    const data = await response.text();
-
-    Logger.debug("Response data:", {
-      length: data.length,
-      preview: data.substring(0, 200),
-    });
-
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(data, "text/xml");
-
-    const parserError = xmlDoc.querySelector("parsererror");
-    if (parserError) {
-      throw new Error(`XML parsing failed: ${parserError.textContent}`);
-    }
-
-    const activities = Array.from(xmlDoc.getElementsByTagName("Activity"))
-      .filter((activity) => activity.getAttribute("type") === "media.download")
-      .map((activity) => {
-        const attributes = Array.from(activity.attributes);
-        const activityData = {};
-
-        attributes.forEach((attr) => {
-          let value = attr.value;
-          if (attr.name === "progress" || attr.name === "userID") {
-            value = parseInt(value, 10) || 0;
-          }
-          activityData[attr.name] = value;
-        });
-
-        return activityData;
+    // Test connection with more detailed error handling
+    try {
+      const response = await plexAxios.get("/identity", {
+        params: {
+          "X-Plex-Token": plexToken,
+        },
+        timeout: 30000, // Specific timeout for this request
       });
 
-    Logger.plex("Successfully fetched activities", {
-      count: activities.length,
-      firstActivity: activities[0]
-        ? {
-            type: activities[0].type,
-            progress: activities[0].progress,
-          }
-        : null,
-    });
+      if (!response.data?.MediaContainer) {
+        throw new Error("Invalid response from Plex server");
+      }
 
-    return activities;
+      logInfo("Plex connection successful", {
+        serverName: response.data.MediaContainer.friendlyName,
+      });
+
+      return response.data;
+    } catch (connectionError) {
+      // More specific error handling
+      if (connectionError.code === "ECONNABORTED") {
+        throw new Error(
+          `Plex connection timed out. Please check your server URL and network connection.`
+        );
+      }
+      throw connectionError;
+    }
   } catch (error) {
-    Logger.error("Plex fetch error:", {
-      message: error.message,
-      stack: error.stack,
-    });
-    throw error;
+    logError("Plex connection failed", error);
+
+    if (error.response?.status === 401) {
+      throw new Error("Invalid Plex token");
+    }
+
+    if (error.code === "ECONNREFUSED") {
+      throw new Error(
+        "Unable to connect to Plex server. Please check if the server is running."
+      );
+    }
+
+    throw new Error(
+      error.message ||
+        "Failed to connect to Plex server. Please check your server URL and token."
+    );
   }
 };
 
-export const testPlexConnection = async (serverUrl, token) => {
+export const fetchPlexActivities = async (plexToken) => {
   try {
-    Logger.plex("Testing Plex connection");
-
-    const response = await fetch("/api/test-connection", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ serverUrl, token }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Connection test failed");
+    if (!plexToken) {
+      throw new Error("Plex token is required");
     }
 
-    return true;
+    const response = await plexAxios.get("/activities", {
+      params: {
+        "X-Plex-Token": plexToken,
+      },
+    });
+
+    if (!response.data?.MediaContainer) {
+      throw new Error("Invalid response from Plex server");
+    }
+
+    const activities = response.data.MediaContainer.Activity || [];
+
+    logInfo("Fetched Plex activities", {
+      count: activities.length,
+    });
+
+    return activities.map((activity) => ({
+      uuid: activity.uuid,
+      type: activity.type,
+      title: activity.title,
+      subtitle: activity.subtitle,
+      progress:
+        typeof activity.progress === "number"
+          ? Math.min(activity.progress, 100)
+          : 0,
+    }));
   } catch (error) {
-    Logger.error("Connection test failed:", error);
-    throw error;
+    logError("Failed to fetch Plex activities", error);
+    throw new Error(
+      error.response?.data?.error || "Failed to fetch Plex activities"
+    );
   }
 };

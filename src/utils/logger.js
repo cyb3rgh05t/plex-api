@@ -1,55 +1,89 @@
+const LOG_LEVELS = {
+  ERROR: "error",
+  WARN: "warn",
+  INFO: "info",
+  DEBUG: "debug",
+};
+
+// Function to redact sensitive information
+const redactSensitiveData = (data) => {
+  if (typeof data === "object" && data !== null) {
+    const redactedData = { ...data };
+
+    // List of keys to redact
+    const sensitiveKeys = [
+      "plexToken",
+      "tautulliApiKey",
+      "password",
+      "apiKey",
+      "token",
+    ];
+
+    sensitiveKeys.forEach((key) => {
+      if (redactedData.hasOwnProperty(key)) {
+        // Replace with REDACTED
+        redactedData[key] = "REDACTED";
+      }
+    });
+
+    return redactedData;
+  }
+  return data;
+};
+
 class Logger {
-  static logStyles = {
-    info: {
-      ascii: "🔵 ℹ️",
-      color: "\x1b[36m", // cyan
-    },
-    error: {
-      ascii: "🔴 ❌",
-      color: "\x1b[31m", // red
-    },
-    debug: {
-      ascii: "🟡 🔍",
-      color: "\x1b[33m", // yellow
-    },
-    api: {
-      ascii: "🟣 🌐",
-      color: "\x1b[35m", // magenta
-    },
-    plex: {
-      ascii: "🟢 📺",
-      color: "\x1b[32m", // green
-    },
-  };
+  constructor() {
+    this.isDevelopment = import.meta.env.DEV;
+  }
 
-  static formatMessage(type, message, data = null) {
+  formatMessage(level, message, meta = {}) {
     const timestamp = new Date().toISOString();
-    const style = this.logStyles[type];
-    const dataString = data ? JSON.stringify(data, null, 2) : "";
-    return `${
-      style.ascii
-    } [${type.toUpperCase()}] ${timestamp} - ${message} ${dataString}`;
+    return {
+      timestamp,
+      level,
+      message,
+      ...redactSensitiveData(meta),
+    };
   }
 
-  static info(message, data = null) {
-    console.log(this.formatMessage("info", message, data));
+  error(message, error = null) {
+    const formattedMessage = this.formatMessage(LOG_LEVELS.ERROR, message, {
+      error: error ? redactSensitiveData(error) : null,
+    });
+    console.error(formattedMessage);
+    // In production, you might want to send this to a logging service
+    if (!this.isDevelopment) {
+      // Send to logging service if needed
+    }
   }
 
-  static error(message, error = null) {
-    console.error(this.formatMessage("error", message, error));
+  warn(message, meta = {}) {
+    const formattedMessage = this.formatMessage(LOG_LEVELS.WARN, message, meta);
+    console.warn(formattedMessage);
   }
 
-  static debug(message, data = null) {
-    console.debug(this.formatMessage("debug", message, data));
+  info(message, meta = {}) {
+    const formattedMessage = this.formatMessage(LOG_LEVELS.INFO, message, meta);
+    console.info(formattedMessage);
   }
 
-  static api(message, data = null) {
-    console.log(this.formatMessage("api", message, data));
-  }
-
-  static plex(message, data = null) {
-    console.log(this.formatMessage("plex", message, data));
+  debug(message, meta = {}) {
+    if (this.isDevelopment) {
+      const formattedMessage = this.formatMessage(
+        LOG_LEVELS.DEBUG,
+        message,
+        meta
+      );
+      console.debug(formattedMessage);
+    }
   }
 }
 
-export default Logger;
+const logger = new Logger();
+
+export const logError = (message, error = null) => logger.error(message, error);
+export const logWarn = (message, meta = {}) => logger.warn(message, meta);
+export const logInfo = (message, meta = {}) => logger.info(message, meta);
+export const logDebug = (message, meta = {}) => logger.debug(message, meta);
+
+export default logger;
