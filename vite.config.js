@@ -8,8 +8,9 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3005,
+    cors: true,
     disableHostCheck: true,
-    allowedHosts: "all",
+    allowedHosts: ["all", "plexapi.mystreamnet.club", ".mystreamnet.club"],
     proxy: {
       "/api/plex": {
         target: "http://your-plex-server:32400",
