@@ -4,8 +4,15 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: "0.0.0.0",
+    host: true, // This allows all hosts
     port: 3005,
+    strictPort: false,
+
+    // This disables host checking completely
+    ...(process.env.VITE_ALLOW_ALL_HOSTS === "true" && {
+      host: "0.0.0.0",
+      disableHostCheck: true,
+    }),
     proxy: {
       "/api/plex": {
         target: "http://your-plex-server:32400",

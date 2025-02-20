@@ -926,9 +926,9 @@ app.get("/health", (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3006;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Proxy server running on http://0.0.0.0:${PORT}`);
+const PROXY_PORT = process.env.PORT || 3006;
+app.listen(PROXY_PORT, "0.0.0.0", () => {
+  console.log(`Proxy server running on http://0.0.0.0:${PROXY_PORT}`);
   console.log("Current configuration:", getConfig());
   console.log("API endpoints:");
   console.log("  - GET /api/downloads");
