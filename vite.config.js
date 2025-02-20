@@ -7,6 +7,16 @@ export default defineConfig({
     host: true, // This allows all hosts
     port: 3005,
     strictPort: false,
+    ...(process.env.VITE_ALLOWED_HOSTS && {
+      allowedHosts: (() => {
+        const hosts =
+          process.env.VITE_ALLOWED_HOSTS === "*"
+            ? "all"
+            : process.env.VITE_ALLOWED_HOSTS.split(",");
+        console.log("Allowed Hosts:", hosts);
+        return hosts;
+      })(),
+    }),
 
     // This disables host checking completely
     ...(process.env.VITE_ALLOW_ALL_HOSTS === "true" && {
