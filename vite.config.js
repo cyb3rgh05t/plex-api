@@ -8,9 +8,12 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3005,
-    cors: true,
+    cors: {
+      origin: "*", // Allow CORS from any origin
+    },
     disableHostCheck: true,
-    allowedHosts: "all",
+    allowedHosts: process.env.VITE_ALLOWED_HOSTS || "all",
+    //allowedHosts: "all",
     //allowedHosts: ["all", "plexapi.mystreamnet.club", ".mystreamnet.club"],
     proxy: {
       "/api/plex": {
