@@ -35,7 +35,7 @@
   "author": "cyb3rgh05t",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cyb3rgh05t/custom-api.git"
+    "url": "git+https://github.com/cyb3rgh05t/plex-api.git"
   },
   "license": "MIT",
   "main": "postcss.config.js",
