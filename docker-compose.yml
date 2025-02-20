@@ -6,10 +6,8 @@ services:
     environment:
       - "TZ=${TZ}"
       - "NODE_ENV=production"
-      - "VITE_HOST=0.0.0.0"
-      - "VITE_PORT=3005"
-      - "VITE_DISABLE_HOST_CHECK=true"
-      - "VITE_ALLOWED_HOSTS=*"
+      - "PORT=3005"
+      - "ALLOWED_HOSTS=*"
     image: "ghcr.io/cyb3rgh05t/plex-api:dev"
     restart: "unless-stopped"
     ports:

@@ -4,28 +4,8 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   server: {
-    // Use environment variables with fallback defaults
-    host: process.env.VITE_HOST || "0.0.0.0",
-    port: parseInt(process.env.VITE_PORT || "3005"),
-
-    // Handle host checking based on environment variables
-    ...(process.env.VITE_DISABLE_HOST_CHECK === "true"
-      ? {
-          // Completely disable host checking
-          host: "0.0.0.0",
-          disableHostCheck: true,
-        }
-      : {}),
-
-    // Allow specific hosts or all hosts
-    ...(process.env.VITE_ALLOWED_HOSTS
-      ? {
-          allowedHosts:
-            process.env.VITE_ALLOWED_HOSTS === "*"
-              ? "all"
-              : process.env.VITE_ALLOWED_HOSTS.split(","),
-        }
-      : {}),
+    host: "0.0.0.0",
+    port: 3005,
     proxy: {
       "/api/plex": {
         target: "http://your-plex-server:32400",

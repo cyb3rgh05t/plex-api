@@ -28,7 +28,41 @@ const PLEX_HEADERS = [
 // CORS configuration
 app.use(
   cors({
-    origin: "http://localhost:3005",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // List of allowed origins from environment variable
+      const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+        ? process.env.ALLOWED_ORIGINS.split(",")
+        : ["http://localhost:3005"];
+
+      // Check if '*' is specified (allow all origins)
+      if (ALLOWED_ORIGINS.includes("*")) {
+        return callback(null, true);
+      }
+
+      // Check if the origin matches any allowed origin
+      const isAllowed = ALLOWED_ORIGINS.some((allowedOrigin) => {
+        // Exact match
+        if (origin === allowedOrigin) return true;
+
+        // Wildcard subdomain match
+        if (allowedOrigin.startsWith("*.")) {
+          const domain = allowedOrigin.slice(2);
+          return new URL(origin).hostname.endsWith(domain);
+        }
+
+        return false;
+      });
+
+      if (isAllowed) {
+        return callback(null, true);
+      }
+
+      // Reject if not in allowed origins
+      callback(new Error("Not allowed by CORS policy"));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", ...PLEX_HEADERS],
