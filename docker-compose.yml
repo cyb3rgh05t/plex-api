@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  plex-api:
+    hostname: "plex-api"
+    container_name: "plex-api"
+    environment:
+      - "TZ=${TZ}"
+      - "NODE_ENV=production"
+      - "VITE_HOST=0.0.0.0"
+      - "VITE_PORT=3005"
+      - "VITE_DISABLE_HOST_CHECK=true"
+      - "VITE_ALLOWED_HOSTS=*"
+    image: "ghcr.io/cyb3rgh05t/plex-api:dev"
+    restart: "unless-stopped"
+    ports:
+      - "3005:3005" # frontend
+      - "3006:3006" # proxy-server backend
+    volumes:
+      - "/opt/appdata/plex-api:/app/data"
